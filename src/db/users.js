@@ -24,21 +24,21 @@ import { db } from "../core/service/firebase/firebase";
 //   }
 // }
 
-const savePersonName = (name, last, born) => {
-  addDoc(collection(db, "users"), { name, last, born });
+const saveTorneo = (name, fecha, cantidad, url) => {
+  addDoc(collection(db, "Torneos"), { name, fecha, cantidad, url });
 }
 
-const getPersons = async ()  => {
- const result = await getDocs(query(collection(db, "users")));
+const getTorneo = async ()  => {
+ const result = await getDocs(query(collection(db, "Torneos")));
  return result;
 }
 
-const deletePerson = async (id) => { // El id del que voy a borrar
-  await deleteDoc(doc(db, "users", id));
+const deleteTorneo = async (id) => { // El id del que voy a borrar
+  await deleteDoc(doc(db, "Torneos", id));
 }
 
-const updatePerson = async (id, name, last, born) => { // El id que quiero actualizar y su nuevo nombre
-  await updateDoc(doc(db, "users", id), { name, last, born })
+const updateTorneo = async (id, name, fecha, cantidad,url) => { // El id que quiero actualizar y su nuevo nombre
+  await updateDoc(doc(db, "Torneos", id), { name, fecha, cantidad, url })
 }
 
-export { getPersons, savePersonName, deletePerson, updatePerson };
+export { getTorneo, saveTorneo, deleteTorneo, updateTorneo };
