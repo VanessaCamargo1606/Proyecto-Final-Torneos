@@ -24,7 +24,6 @@ import {
   MDBRow,
   MDBCol,
   MDBInput,
-
 } from "mdb-react-ui-kit";
 
 const auth = getAuth(app);
@@ -47,7 +46,7 @@ function Login() {
     const docuRef = doc(db, `usuarios/${infoUsuario.user.uid}`);
     setDoc(docuRef, { correo: email, rol: rol });
     setUsuario(email);
-   
+
   }
 
   function submitHandler(e) {
@@ -66,8 +65,8 @@ function Login() {
     } else {
       // login
       signInWithEmailAndPassword(auth, email, password);
-     
-      
+
+
     }
   }
 
@@ -75,7 +74,7 @@ function Login() {
     <h1>{isRegistrando ? "Regístrate" : "Inicia sesión"}</h1>
     <Box sx={{ mb: 4 }} />
 
-    <MDBCard style={{ width: '300px', height: '290px' }}>
+    <MDBCard style={{ width: '300px', height: '320px' }}>
       <form onSubmit={submitHandler}>
         <label>
           Correo electrónico:
@@ -90,8 +89,9 @@ function Login() {
         <Box sx={{ mb: 2 }} />
 
         <label>
-          Rol:
-            <select id="rol">
+          Rol: 
+          {/* form-select es parte de Bootstrap, que mdb-react-ui-kit extiende y estiliza */}
+            <select id="rol" className="form-select"> 
             <option value="admin">Administrador</option>
             <option value="user">Usuario</option>
           </select>
@@ -112,7 +112,7 @@ function Login() {
 
         />
       </form>
-      <Box sx={{ mb: 6 }} />
+      <Box sx={{ mb: 5 }} />
 
       <Button onClick={() => setIsRegistrando(!isRegistrando)} variant="contained" style={{ width: '235px' }}>
         {isRegistrando ? "Ya tengo una cuenta" : "Quiero registrarme"}
