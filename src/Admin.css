@@ -28,7 +28,7 @@
     cursor: pointer;
     font-weight: bold;
     text-transform: uppercase;
-    background-color: #3b5998; /* Azul de Facebook */
+    background-color: #1976d2; /* Azul de Facebook */
     color: white;
   }
   
@@ -49,6 +49,7 @@
     font-size: 36px; /* Tamaño de fuente del título */
     color: #333; /* Color del texto del título */
     margin-bottom: 20px; /* Espacio entre el título y otros elementos */
+    font-weight: bold; /* Peso de la fuente */
   }
 
   .input{
@@ -98,5 +99,6 @@
     color: gray;
     
   }
+  
   
  

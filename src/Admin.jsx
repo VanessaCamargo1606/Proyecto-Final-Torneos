@@ -4,6 +4,7 @@ import "./Admin.css";
 //import { savePersonName, deletePerson, updatePerson, getPersons } from "./users";
 import { saveTorneo, getTorneo, deleteTorneo, updateTorneo } from "./db/users";
 import { db } from "./core/service/firebase/firebase";
+import { addDoc, doc, collection, getDocs, deleteDoc, updateDoc, query, getDoc } from "firebase/firestore";
 
 import {
   MDBCard,
@@ -17,13 +18,12 @@ import {
   MDBCol,
 } from "mdb-react-ui-kit";
 
+import Button from "@mui/material/Button";
+
 import { storage } from "./core/service/firebase/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-//import { v4 } from "uuid";
-
-
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { getImageUrlByName } from "./core/service/firebase/storage";
-//import { url } from "node:inspector";
+
 
 
 function Admin() {
@@ -53,26 +53,35 @@ function Admin() {
     setTorneos(p.docs);
   }
 
-  const removeTorneo = async () => {
-    await deleteTorneo(torneoId);
-    getTorneoData();
+  // const removeTorneo = async () => {
+  //   await deleteTorneo(torneoId);
+  //   getTorneoData();
 
-  }
-  const updateTorneoData = async () => {
-    await updateTorneo(torneoId, torneoName, torneoFecha, torneoCantidad); // Esperar a que se haga el update porque es asincrona
+  // }
+  const updateTorneoData = async (torneoId) => {
+    const url = await uploadImage();
+    await updateTorneo(torneoId, torneoName, torneoFecha, torneoCantidad, url); // Esperar a que se haga el update porque es asincrona
     getTorneoData(); // Se hace de nuevo la consulta para mostrar los datos nuevos
   }
 
-  // const uploadImage = async () => {
-  //   if (torneoImagen == null) return;
-  //   const imageRef = ref(storage, `images/${torneoImagen.name}`);
-  //   const snapshot = await uploadBytes(imageRef, torneoImagen);
-  //   const url = await getDownloadURL(snapshot.ref);
-  //   setImagenURL(url);
-  //   console.log(url);
-  //   console.log(imagenURL);
-  //   alert("imagen subida");
-  // };
+  // Método para eliminar la imagen del almacenamiento de Firebase
+  const removeTorneoData = async (id) => {
+
+    const url = await getImageUrlById(id);
+    console.log(url);
+    const fileName = getFileNameFromUrl(url);
+    console.log(fileName);
+    const imageRef = ref(storage, `images/${fileName}`);
+    await deleteObject(imageRef);
+
+    await deleteDoc(doc(db, "Torneos", id));
+    console.log(`Imagen con ID ${id} eliminada del almacenamiento y Firestore`);
+  };
+
+  const removeTorneo = async (torneoId) => {
+    await removeTorneoData(torneoId);
+    getTorneoData();
+  }
 
   const uploadImage = async () => {
     if (torneoImagen == null) return null;
@@ -81,6 +90,24 @@ function Admin() {
     const url = await getDownloadURL(snapshot.ref);
     alert("imagen subida");
     return url;
+  };
+
+  // Método para obtener la URL de la imagen de Firestore por ID
+  const getImageUrlById = async (id) => {
+    const docRef = doc(db, "Torneos", id);
+    const docSnap = await getDoc(docRef);
+    return docSnap.data().url;
+  };
+
+  // Método para obtener el nombre de la imagen desde la url
+  const getFileNameFromUrl = (url) => {
+    console.log("URL recibida para extraer nombre de archivo:", url); // Verificar la URL recibida
+    const decodedUrl = decodeURIComponent(url);
+    console.log("URL decodificada:", decodedUrl); // Verificar la URL decodificada
+    const parts = decodedUrl.split('/');
+    const fileName = parts[parts.length - 1].split('?')[0];
+    console.log("Nombre del archivo extraído:", fileName); // Verificar el nombre del archivo extraído
+    return fileName;
   };
 
   return (   
@@ -100,12 +127,9 @@ function Admin() {
 
         <div className="botones">
           <button onClick={saveTorneoData}> Guardar</button>
-          <button onClick={removeTorneo}> Eliminar</button>
-          <button onClick={updateTorneoData}> Actualizar</button>
+          {/* <button onClick={removeTorneo}> Eliminar</button> */}
+          {/* <button onClick={updateTorneoData}> Actualizar</button> */}
 
-          {/* 
-          <button onClick={uploadImage}>Subir Imagen</button> */}
-          {/* <input className="inputImagen" type="file"/> */}
 
           <div class="inputImagenContainer">
             <label class="inputImagenBoton">
@@ -133,7 +157,11 @@ function Admin() {
                         <MDBCardTitle>{p.data().name}</MDBCardTitle>
                         <MDBCardText>{p.data().fecha}</MDBCardText>
                         <MDBCardText>{p.data().cantidad}</MDBCardText>
-                        <MDBCardText>{p.id}</MDBCardText>
+                        {/* <MDBCardText>{p.id}</MDBCardText> */}
+                        <div style={{ display: 'flex', gap: '10px', width: '300px', height: '40px', marginLeft: '-50px' }}>
+                          <MDBBtn onClick={() => updateTorneoData(p.id)} >Actualizar</MDBBtn>
+                          <MDBBtn onClick={() => removeTorneo(p.id)} > Eliminar</MDBBtn>
+                        </div>
                       </MDBCardBody>
                     </MDBCol>
                   </MDBCard>
@@ -141,35 +169,6 @@ function Admin() {
             </MDBRow>
           </MDBContainer>
         </div>
-
-        {/* <table className="table table-hover table-dark">
-      <thead className="thead-dark">
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Fecha</th>
-          <th>Cantidad</th>
-        </tr>
-      </thead>
-      <tbody>
-        {torneos && torneos.map(p => (
-          <tr key={p.id}>
-            <td>{p.id}</td>
-            <td>{p.data().name}</td>
-            <td>{p.data().fecha}</td>
-            <td>{p.data().cantidad}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table> */}
-
-        {/* 
-      {
-        torneos && torneos.map(p =>
-           <p>{p.id} - {p.data().name} - {p.data().fecha} - {p.data().cantidad}</p>)
-      } */}
-
-
       </div>
     </div>  
 

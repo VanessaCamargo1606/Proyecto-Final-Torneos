@@ -41,4 +41,5 @@ const updateTorneo = async (id, name, fecha, cantidad,url) => { // El id que qui
   await updateDoc(doc(db, "Torneos", id), { name, fecha, cantidad, url })
 }
 
+
 export { getTorneo, saveTorneo, deleteTorneo, updateTorneo };

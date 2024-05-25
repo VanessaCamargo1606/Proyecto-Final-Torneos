@@ -2,77 +2,79 @@ import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+
 import Admin from "./Admin";
 
-// import { savePersonName, deletePerson, updatePerson, getPersons } from "./db/users";
-// import { db } from "./core/service/firebase/firebase";
+import Home from "./Home";
+import Login from "./Login";
+
+import { db } from "./core/service/firebase/firebase";  // importar la base de datos
+import { app } from "./core/service/firebase/firebase"; // importar la aplicacion
+
+ import { getAuth, onAuthStateChanged } from "firebase/auth";
+ import { getFirestore, doc, getDoc } from "firebase/firestore";
+
+ const auth = getAuth(app );
+//const firestore = getFirestore(app);
 
 
-function App() {
+ function App() {
+   const [user, setUser] = useState(null);
+   const [loading, setLoading] = useState(true); // Añadir estado de carga
 
-  return <Admin/>
-     
-     
+   async function getRol(uid) {
+     const docuRef = doc(db, `usuarios/${uid}`);
+     const docuCifrada = await getDoc(docuRef);
+     const infoFinal = docuCifrada.data().rol;
+     return infoFinal;
+   }
 
-  // const [personId, setPersonId] = useState(null);
-  // const [personName, setPersonName] = useState(null);
-  // const [personLast, setPersonLast] = useState(null);
-  // const [personBorn, setPersonBorn] = useState(null);
-  // const [persons, setPersons] = useState(null);
+   function setUserWithFirebaseAndRol(usuarioFirebase) {
+     getRol(usuarioFirebase.uid).then((rol) => {
+       const userData = {
+         uid: usuarioFirebase.uid,
+         email: usuarioFirebase.email,
+         rol: rol,
+       };
+       setUser(userData);
+       setLoading(false); // Terminar la carga
+       //console.log("userData final", userData);
+     });
+   }
 
-  // //  useEffect(() => {
-  // //    getUsersCallBack();
-  // //  }, []);
+   useEffect(() => { // función para evitar un bucle infinito
+    const unsubscribe = onAuthStateChanged(auth, (usuarioFirebase) => {
+      if (usuarioFirebase) {
+        if (!user) {
+          setUserWithFirebaseAndRol(usuarioFirebase);
+        }
+      } else {
+        setUser(null);
+        setLoading(false); // Terminar la carga incluso si no hay usuario
+      }
+    });
 
-  // //  let getUsersCallBack = async () => {
-  // //    let response = await readUsers(db);
-  // //    console.log("response ", response);
-  // //    setUsers(response); // Almacenar los usuarios en el estado
-  // //  };
+    return () => unsubscribe(); // Cleanup subscription on unmount
+  }, [user]);
 
-  // const savePerson = async () => {
-  //   await savePersonName(personName, personLast, personBorn);
-  //   getPersonsData();
-  // }
+  if (loading) {
+    return <div>Loading...</div>; // Mostrar un mensaje de carga
+  }
 
-  // useEffect(() => {
-  //   getPersonsData();
-  // }, []);
+  //  onAuthStateChanged(auth, (usuarioFirebase) => {
+  //    if (usuarioFirebase) {
+  //      //funcion final
 
-  // const getPersonsData = async () => {
-  //   const p = await getPersons();
-  //   console.log(p.docs[0].data());
-  //   setPersons(p.docs);
-  // }
+  //      if (!user) {
+  //        setUserWithFirebaseAndRol(usuarioFirebase);
+  //      }
+  //      setUser(null);
+  //    }
+  //  });
 
-  // const removePerson = async () => {
-  //   await deletePerson(personId);
-  //   getPersonsData();
+  //return <Admin />
 
-  // }
-  // const updatePersonData = async () => {
-  //   await updatePerson(personId, personName, personLast, personBorn); // Esperar a que se haga el update porque es asincrona
-  //   getPersonsData(); // Se hace de nuevo la consulta para mostrar los datos nuevos
-  // }
-  // return (   
-  //    <>
-  //   <div>
-  //     <input type="text" onChange={e => setPersonId(e.target.value)} placeholder="Identificación" />
-  //     <input type="text" onChange={e => setPersonName(e.target.value)} placeholder="Nombre" />
-  //     <input type="text" onChange={e => setPersonLast(e.target.value)} placeholder="Apellido" />
-  //     <input type="text" onChange={e => setPersonBorn(e.target.value)} placeholder="Nacimiento" />
-  //     <div>
-  //       <button onClick={savePerson}> Guardar</button>
-  //       <button onClick={removePerson}> Eliminar</button>
-  //       <button onClick={updatePersonData}> Actualizar</button>
-  //     </div>
-  //     {
-  //       persons && persons.map(p => <p>{p.id} - {p.data().name} - {p.data().last} - {p.data().born}</p>)
-  //     }
-  //   </div>   
-
-  //    </>
-  // );
+   return <>{user ? <Home user={user} /> : <Login />} </>; // si se inició sesión con un usuario mostrar home sino login
 }
 
 export default App;

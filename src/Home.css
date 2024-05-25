@@ -1,0 +1,15 @@
+.home {
+    display: flex;   
+    justify-content: space-between;
+  }
+
+  .homeTitulo {
+    font-size: 2em; /* Tamaño de la fuente */
+    font-weight: bold; /* Peso de la fuente */
+    margin: 0; /* Elimina el margen por defecto */
+    color: #333; /* Color del texto */
+  }
+
+  .boton-button {
+    margin-bottom: 15px;
+  }
