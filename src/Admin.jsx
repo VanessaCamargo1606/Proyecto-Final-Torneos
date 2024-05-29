@@ -16,7 +16,7 @@ import {
   MDBContainer,
   MDBRow,
   MDBCol,
-  
+
 } from "mdb-react-ui-kit";
 
 import Button from "@mui/material/Button";
@@ -37,6 +37,7 @@ function Admin() {
 
   const [torneoImagen, setTorneoImagen] = useState(null);
   const [imagenURL, setImagenURL] = useState('');
+  //const [imagen, setImagen] = useState('');
 
   const saveTorneoData = async () => {
     const url = await uploadImage();
@@ -54,16 +55,60 @@ function Admin() {
     setTorneos(p.docs);
   }
 
-  // const removeTorneo = async () => {
-  //   await deleteTorneo(torneoId);
-  //   getTorneoData();
+  /***ACTUALIZAR IMAGEN****/
 
-  // }
   const updateTorneoData = async (torneoId) => {
-    const url = await uploadImage();
-    await updateTorneo(torneoId, torneoName, torneoFecha, torneoCantidad, url); // Esperar a que se haga el update porque es asincrona
+    await updateById(torneoId, torneoName, torneoFecha, torneoCantidad, torneoImagen); // Esperar a que se haga el update porque es asincrona
     getTorneoData(); // Se hace de nuevo la consulta para mostrar los datos nuevos
   }
+
+  const updateById = async (id, nombre, date, cant, newImageFile) => {
+    try {
+      // Obtener la URL de la imagen existente desde Firestore
+      const docRef = doc(db, "Torneos", id);
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+
+      // Eliminar la imagen antigua
+      const oldImageUrl = data.url;
+      const oldFileName = getFileNameFromUrl(oldImageUrl);
+      const oldImageRef = ref(storage, `images/${oldFileName}`);
+      await deleteObject(oldImageRef);
+
+      // Subir la nueva imagen al almacenamiento
+      const newFileName = newImageFile.name;
+      const newImageRef = ref(storage, `images/${newFileName}`);
+      await uploadBytes(newImageRef, newImageFile);
+
+      // Obtener la URL de descarga de la nueva imagen
+      const newImageUrl = await getDownloadURL(newImageRef);
+
+
+      // Actualizar la URL de la imagen en Firestore
+      await updateDoc(docRef, { name: nombre, fecha: date, cantidad: cant, url: newImageUrl });
+      //await updateDoc(doc(db, "Torneos", id), { name, fecha, cantidad, newImageUrl })
+      //await updateDoc(docRef, {name: nombre, fecha: date, cantidad: cant, url: newImageUrl });
+
+      // Obtener los datos actualizados de la imagen
+      //getImagenData();
+      alert("Datos actualizados");
+
+      console.log(`Imagen con ID ${id} actualizada en el almacenamiento y Firestore`);
+    } catch (error) {
+      console.error("Error actualizando la imagen:", error);
+    }
+  };
+
+
+  // const updateTorneoData = async (torneoId) => {
+  //   const url = await uploadImage();
+  //   await updateTorneo(torneoId, torneoName, torneoFecha, torneoCantidad, url); // Esperar a que se haga el update porque es asincrona
+  //   getTorneoData(); // Se hace de nuevo la consulta para mostrar los datos nuevos
+  // }
+
+  // const updateTorneo = async (id, name, fecha, cantidad,url) => { // El id que quiero actualizar y su nuevo nombre
+  //   await updateDoc(doc(db, "Torneos", id), { name, fecha, cantidad, url })
+  // }
 
   // Método para eliminar la imagen del almacenamiento de Firebase
   const removeTorneoData = async (id) => {
@@ -75,6 +120,18 @@ function Admin() {
     const imageRef = ref(storage, `images/${fileName}`);
     await deleteObject(imageRef);
 
+
+    // Obtener referencia a la subcolección 'participantes'
+    const participantesRef = collection(db, "Torneos", id, "Participantes");
+    const q = query(participantesRef);
+    const querySnapshot = await getDocs(q);
+
+    // Eliminar todos los documentos en la subcolección 'participantes'
+    querySnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+
+    // Eliminar los documentos de Torneos
     await deleteDoc(doc(db, "Torneos", id));
     console.log(`Imagen con ID ${id} eliminada del almacenamiento y Firestore`);
   };
