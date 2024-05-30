@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 import "./Admin.css";
-//import { savePersonName, deletePerson, updatePerson, getPersons } from "./users";
 import { saveTorneo, getTorneo, deleteTorneo, updateTorneo } from "./db/users";
 import { db } from "./core/service/firebase/firebase";
 import { addDoc, doc, collection, getDocs, deleteDoc, updateDoc, query, getDoc } from "firebase/firestore";
@@ -86,8 +85,6 @@ function Admin() {
 
       // Actualizar la URL de la imagen en Firestore
       await updateDoc(docRef, { name: nombre, fecha: date, cantidad: cant, url: newImageUrl });
-      //await updateDoc(doc(db, "Torneos", id), { name, fecha, cantidad, newImageUrl })
-      //await updateDoc(docRef, {name: nombre, fecha: date, cantidad: cant, url: newImageUrl });
 
       // Obtener los datos actualizados de la imagen
       //getImagenData();
@@ -99,16 +96,6 @@ function Admin() {
     }
   };
 
-
-  // const updateTorneoData = async (torneoId) => {
-  //   const url = await uploadImage();
-  //   await updateTorneo(torneoId, torneoName, torneoFecha, torneoCantidad, url); // Esperar a que se haga el update porque es asincrona
-  //   getTorneoData(); // Se hace de nuevo la consulta para mostrar los datos nuevos
-  // }
-
-  // const updateTorneo = async (id, name, fecha, cantidad,url) => { // El id que quiero actualizar y su nuevo nombre
-  //   await updateDoc(doc(db, "Torneos", id), { name, fecha, cantidad, url })
-  // }
 
   // Método para eliminar la imagen del almacenamiento de Firebase
   const removeTorneoData = async (id) => {
@@ -177,7 +164,7 @@ function Admin() {
       </div>
 
       <div>
-        <input className="input" type="text" onChange={e => setTorneoId(e.target.value)} placeholder="Id" />
+
         <input className="input" type="text" onChange={e => setTorneoName(e.target.value)} placeholder="Nombre Torneo" />
         <input className="input" type="text" onChange={e => setTorneoFecha(e.target.value)} placeholder="Fecha Limite" />
         <input className="input" type="text" onChange={e => setTorneoCantidad(e.target.value)} placeholder="Cantidad Max" />
@@ -185,8 +172,7 @@ function Admin() {
 
         <div className="botones">
           <button onClick={saveTorneoData}> Guardar</button>
-          {/* <button onClick={removeTorneo}> Eliminar</button> */}
-          {/* <button onClick={updateTorneoData}> Actualizar</button> */}
+
 
 
           <div class="inputImagenContainer">

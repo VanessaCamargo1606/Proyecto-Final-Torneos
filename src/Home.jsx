@@ -23,7 +23,7 @@ function Home({ user }) {
         <MDBBtn onClick={() => signOut(auth)} className="boton-button"> Cerrar sesión</MDBBtn>
 
       </div>
-      
+
       {user.rol === "admin" ? <Admin /> : <Usuario currentUser={user} />}
 
 

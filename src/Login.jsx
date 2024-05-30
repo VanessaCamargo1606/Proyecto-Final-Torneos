@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-
-// import firebaseApp from "../firebase/credenciales";
 import { db } from "./core/service/firebase/firebase";
 import { app } from "./core/service/firebase/firebase";
 
@@ -89,9 +87,9 @@ function Login() {
         <Box sx={{ mb: 2 }} />
 
         <label>
-          Rol: 
+          Rol:
           {/* form-select es parte de Bootstrap, que mdb-react-ui-kit extiende y estiliza */}
-            <select id="rol" className="form-select"> 
+          <select id="rol" className="form-select">
             <option value="admin">Administrador</option>
             <option value="user">Usuario</option>
           </select>
